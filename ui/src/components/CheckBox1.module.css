@@ -1,0 +1,83 @@
+.checkbox1 {
+  transition: all .2s;
+  flex-direction: row;
+  display: flex;
+  color: #ffffff;
+  text-decoration: none;
+  justify-content: space-between;
+}
+
+.checkbox1 span {
+  display: block;
+  padding-left: 10px;
+}
+
+.checkbox1 i {
+  display: block;
+  width: 34px;
+  height: 20px;
+  background: url("/i/off.svg") center no-repeat;
+  background-size: 34px 20px;
+}
+
+.checkbox1Active i {
+  background: url("/i/on.svg") center no-repeat;
+  background-size: 34px 20px;
+}
+
+.checkbox2 {
+  transition: all .2s;
+  flex-direction: row;
+  display: flex;
+  color: #7f7b7a;
+  text-decoration: none;
+}
+
+.checkbox2 span {
+  display: block;
+  padding-left: 10px;
+}
+
+.checkbox2 i {
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: url("/i/track-unselect.svg") center no-repeat;
+  background-size: 20px 20px;
+}
+
+.design i {
+  background: url("/i/track-design.svg") center no-repeat;
+  background-size: 20px 20px;
+}
+
+.design {
+  color: #43DAFD;
+}
+
+.development i {
+  background: url("/i/track-development.svg") center no-repeat;
+  background-size: 20px 20px;
+}
+
+.development {
+  color: #12b81c;
+}
+
+.data-science i {
+  background: url("/i/track-data-science.svg") center no-repeat;
+  background-size: 20px 20px;
+}
+
+.data-science {
+  color: #feb902;
+}
+
+.algorithm i {
+  background: url("/i/track-algorithm.svg") center no-repeat;
+  background-size: 20px 20px;
+}
+
+.algorithm {
+  color: #FB3313;
+}

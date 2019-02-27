@@ -90,26 +90,7 @@ aside {
     display: flex;
     padding-left: 10px;
     flex-direction: column; }
-    aside .statistic-wrapper .statistic strong {
-      flex: 1;
-      font-size: 25px;
-      font-weight: bold;
-      font-style: normal;
-      font-stretch: normal;
-      line-height: 1.4;
-      letter-spacing: normal;
-      color: #ffffff; }
-    aside .statistic-wrapper .statistic small {
-      opacity: 0.23;
-      flex: 1;
-      font-size: 11px;
-      font-weight: bold;
-      font-style: normal;
-      font-stretch: normal;
-      line-height: 1.82;
-      letter-spacing: normal;
-      color: #ffffff; }
-  aside .filters {
+    aside .filters {
     margin: 10px 0;
     border-radius: 6px;
     box-shadow: 0 5px 35px 5px rgba(21, 21, 22, 0.19), 0 10px 14px -4px rgba(21, 21, 22, 0.45);
@@ -141,41 +122,8 @@ aside {
         padding-bottom: 15px; }
         aside .filters ul.track li:last-child {
           padding-bottom: 0; }
-        aside .filters ul.track li a {
-          transition: all .2s;
-          flex-direction: row;
-          display: flex;
-          color: #7f7b7a;
-          text-decoration: none; }
-          aside .filters ul.track li a span {
-            display: block;
-            padding-left: 10px; }
-          aside .filters ul.track li a i {
-            display: block;
-            width: 20px;
-            height: 20px;
-            background: url("/i/track-unselect.svg") center no-repeat;
-            background-size: 20px 20px; }
-        aside .filters ul.track li.active.design i {
-          background: url("/i/track-design.svg") center no-repeat;
-          background-size: 20px 20px; }
-        aside .filters ul.track li.active.design a {
-          color: #43DAFD; }
-        aside .filters ul.track li.active.development i {
-          background: url("/i/track-development.svg") center no-repeat;
-          background-size: 20px 20px; }
-        aside .filters ul.track li.active.development a {
-          color: #12b81c; }
-        aside .filters ul.track li.active.data-science i {
-          background: url("/i/track-data-science.svg") center no-repeat;
-          background-size: 20px 20px; }
-        aside .filters ul.track li.active.data-science a {
-          color: #feb902; }
-        aside .filters ul.track li.active.algorithm i {
-          background: url("/i/track-algorithm.svg") center no-repeat;
-          background-size: 20px 20px; }
-        aside .filters ul.track li.active.algorithm a {
-          color: #FB3313; }
+
+
     aside .filters ul.operation {
       list-style: none;
       margin: 0;
@@ -190,26 +138,6 @@ aside {
         padding-bottom: 15px; }
         aside .filters ul.operation li:last-child {
           padding-bottom: 0; }
-
-a.checkbox {
-  transition: all .2s;
-  flex-direction: row;
-  display: flex;
-  color: #ffffff;
-  text-decoration: none;
-  justify-content: space-between; }
-  a.checkbox span {
-    display: block;
-    padding-left: 10px; }
-  a.checkbox i {
-    display: block;
-    width: 34px;
-    height: 20px;
-    background: url("/i/off.svg") center no-repeat;
-    background-size: 34px 20px; }
-  a.checkbox.active i {
-    background: url("/i/on.svg") center no-repeat;
-    background-size: 34px 20px; }
 
 /* google-map */
 .google-map {

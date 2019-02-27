@@ -1,77 +1,106 @@
 import React, { Component } from 'react';
 
 import './App.css';
-import CheckBox from './components/CheckBox';
+import CheckBox1 from './components/CheckBox1';
+import StatItem from './components/StatItem';
+import Map from './components/Map';
+import { selectTrack, selectOperation } from './map';
 
 class App extends Component {
 
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
+        this.state = {
+            tracks: {
+                design: false,
+                development: true,
+                'data-science': true,
+                algorithm: true
+            },
+            operations: {
+                submissions: true,
+            }
+        };
+        this.trackChanged = this.trackChanged.bind(this);
+        this.operationChanged = this.operationChanged.bind(this);
+    }
 
-    this.checkboxChanged = this.checkboxChanged.bind(this);
-  }
+    trackChanged(e) {
+        const active = !!!this.state.tracks[e.name];
+        this.setState({
+            tracks: { ...this.state.tracks, [e.name]: active }
+        });
+        selectTrack(this.map.map, active, e.text)
+        console.log(`change track: ${e.name} to ${active}`)
+    }
 
-  checkboxChanged (e) {
-    e.preventDefault();
-    console.log(e.currentTarget);
-  }
+    operationChanged(e) {
+        const active = !!!this.state.operations[e.name]
+        this.setState({
+            operations: { ...this.state.operations, [e.name]: active }
+        });
+        selectOperation(this.map.map, active, e.text)
+        console.log(`change operation: ${e.name} to ${active}`)
+    }
 
-  render() {
-    return (
-      <div>
-        <aside>
-          <div className="top-section">
-            <div className="logo">
-              <img src="./i/logo.svg" alt="logo" />
+    render() {
+        const tracks = [
+            { name: 'design', text: 'DESIGN' },
+            { name: 'development', text: 'DEVELOPMENT' },
+            { name: 'data-science', text: 'DATA-SCIENCE' },
+            { name: 'algorithm', text: 'ALGORITHM' },
+        ];
+        const operations = [
+            { text: 'SUBMISSIONS', name: 'submissions' },
+            { text: 'REVIEW', name: 'review' },
+            { text: 'REGISTRATION', name: 'registration' },
+            { text: 'FORUM', name: 'forum' },
+            { text: 'VIEW', name: 'view' },
+            { text: 'SRM', name: 'srm' }
+        ];
+        return (
+            <div>
+                <aside>
+                    <div className="top-section">
+                        <div className="logo">
+                            <img src="./i/logo.svg" alt="logo" />
+                        </div>
+                        <div className="chart-wrapper">
+                            <div className="chart" id="chart"></div>
+                        </div>
+
+                        <div className="statistic-wrapper">
+                            <StatItem count={134} text="MEMBERS"></StatItem>
+                            <StatItem count={12525} text="NEW REGISTRATIONS"></StatItem>
+                            <StatItem count={245} text="CHALLENGES"></StatItem>
+                            <StatItem count={358436} prefix="$" text="IN PRIZES // LAST 7 DAYS"></StatItem>
+                        </div>
+                    </div>
+                    <div className="filters">
+                        <h3>TRACKS</h3>
+                        <ul className="track" id="trackFilter">
+                            {tracks.map(b =>
+                                <li data-track={b.text} className={b.name} key={b.name}>
+                                    <CheckBox1 name={b.name} text={b.text} kind={2} onChange={this.trackChanged} checked={this.state.trackes[b.name]} />
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+                    <div className="filters">
+                        <h3>SHOW ON MAP</h3>
+                        <ul className="operation" id="operationFilter">
+                            {operations.map(b =>
+                                <li data-operation={b.name} className="submission" key={b.name}>
+                                    <CheckBox1 name={b.name} text={b.text} onChange={this.operationChanged} checked={this.state.operations[b.name]} />
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+                </aside>
+                <Map ref={e => this.map = e} />
             </div>
-            <div className="chart-wrapper">
-              <div className="chart" id="chart"></div>
-            </div>
-
-            <div className="statistic-wrapper">
-              <div className="statistic">
-                <strong data-prefix="" data-count="134">1,34M</strong>
-                <small>MEMBERS</small>
-              </div>
-              <div className="statistic">
-                <strong data-prefix="" data-count="12525">12,525</strong>
-                <small>NEW REGISTRATIONS</small>
-              </div>
-              <div className="statistic">
-                <strong data-prefix="" data-count="245">245</strong>
-                <small>CHALLENGES</small>
-              </div>
-              <div className="statistic">
-                <strong data-prefix="$" data-count="358436">$358,436</strong>
-                <small>IN PRIZES // LAST 7 DAYS</small>
-              </div>
-            </div>
-          </div>
-          <div className="filters">
-            <h3>TRACKS</h3>
-            <ul className="track" id="trackFilter">
-              <li data-track="DESIGN" className="design active"><a href="javascript:;"><i></i><span>DESIGN</span></a></li>
-              <li data-track="DEVELOPMENT" className="development active"><a href="javascript:;"><i></i><span>DEVELOPMENT</span></a></li>
-              <li data-track="DATA-SCIENCE" className="data-science active"><a href="javascript:;"><i></i><span>DATA SCIENCE</span></a></li>
-              <li data-track="ALGORITHM" className="algorithm active"><a href="javascript:;"><i></i><span>ALGORITHM</span></a></li>
-            </ul>
-          </div>
-          <div className="filters">
-            <h3>SHOW ON MAP</h3>
-            <ul className="operation" id="operationFilter">
-              <li data-operation="SUBMISSIONS" className="submission"><CheckBox text="SUBMISSIONS" onChange={this.checkboxChanged} /></li>
-              <li data-operation="REVIEW" className="submission"><a href="javascript:;" className="checkbox"><span>REVIEW</span> <i></i></a></li>
-              <li data-operation="REGISTRATION" className="submission active"><a href="javascript:;" className="checkbox"><span>REGISTRATION</span> <i></i></a></li>
-              <li data-operation="FORUM" className="submission"><a href="javascript:;" className="checkbox"><span>FORUM</span> <i></i></a></li>
-              <li data-operation="VIEW" className="submission"><a href="javascript:;" className="checkbox"><span>VIEW</span> <i></i></a></li>
-              <li data-operation="SRM" className="submission"><a href="javascript:;" className="checkbox active"><span>SRM</span> <i></i></a></li>
-            </ul>
-          </div>
-        </aside>
-        <div className="google-map" id="map" ></div>
-      </div>
-    );
-  }
+        );
+    }
 }
 
 export default App;
