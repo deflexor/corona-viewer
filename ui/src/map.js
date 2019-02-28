@@ -299,7 +299,9 @@ export function initMap(map) {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
 
-    for (let f of filterd) addMarkers(map, f);
+    for (let i = 0; i < filterd.length; i++) {
+        addMarkers(map, filterd[i], i);
+    }
 
     map.addListener('click', function () {
         if (popup !== null) {
@@ -365,7 +367,9 @@ export function selectTrack(map, active, track) {
     const filterd = mapData.filter(item => {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
-    for (let f of filterd) addMarkers(map, f);
+    for (let i = 0; i < filterd.length; i++) {
+        addMarkers(map, filterd[i], i);
+    }
 }
 
 export function selectOperation(map, active, operation) {
@@ -381,7 +385,9 @@ export function selectOperation(map, active, operation) {
     const filterd = mapData.filter(item => {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
-    for (let f of filterd) addMarkers(map, f);
+    for (let i = 0; i < filterd.length; i++) {
+        addMarkers(map, filterd[i], i);
+    }
 }
 
 function addMarkers(map, data, i) {

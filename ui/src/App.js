@@ -81,7 +81,7 @@ class App extends Component {
                         <ul className="track" id="trackFilter">
                             {tracks.map(b =>
                                 <li data-track={b.text} className={b.name} key={b.name}>
-                                    <CheckBox1 name={b.name} text={b.text} kind={2} onChange={this.trackChanged} checked={this.state.trackes[b.name]} />
+                                    <CheckBox1 name={b.name} text={b.text} kind={2} onChange={this.trackChanged} checked={this.state.tracks[b.name]} />
                                 </li>
                             )}
                         </ul>

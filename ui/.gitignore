@@ -12,7 +12,7 @@
 /build
 
 # misc
-apikey.js
+src/apikey.js
 .DS_Store
 .env.local
 .env.development.local
