@@ -21,10 +21,6 @@ const defaultProps = {
 
 class Map extends Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     handleApiLoaded(map, maps) {
         this.map = map;
         initMap(map);

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import CountUp from 'react-countup';
 
 import styles from './StatItem.module.css';
 
@@ -16,15 +17,11 @@ const defaultProps = {
 
 class StatItem extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { text, count, prefix } = this.props;
     return (
       <div className={styles.statistic}>
-        <strong >{prefix}{count.toLocaleString('en')}</strong>
+        <strong ><CountUp prefix={prefix} separator="," end={count} /></strong>
         <small>{text}</small>
       </div>
 

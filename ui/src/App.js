@@ -4,6 +4,7 @@ import './App.css';
 import CheckBox1 from './components/CheckBox1';
 import StatItem from './components/StatItem';
 import Map from './components/Map';
+import Chart from './components/Chart';
 import { selectTrack, selectOperation } from './map';
 
 class App extends Component {
@@ -12,13 +13,18 @@ class App extends Component {
         super(props);
         this.state = {
             tracks: {
-                design: false,
+                design: true,
                 development: true,
                 'data-science': true,
                 algorithm: true
             },
             operations: {
                 submissions: true,
+                review: true,
+                registration: true,
+                forum: true,
+                view: false,
+                srm: true
             }
         };
         this.trackChanged = this.trackChanged.bind(this);
@@ -47,7 +53,7 @@ class App extends Component {
         const tracks = [
             { name: 'design', text: 'DESIGN' },
             { name: 'development', text: 'DEVELOPMENT' },
-            { name: 'data-science', text: 'DATA-SCIENCE' },
+            { name: 'data-science', text: 'DATA SCIENCE' },
             { name: 'algorithm', text: 'ALGORITHM' },
         ];
         const operations = [
@@ -66,7 +72,7 @@ class App extends Component {
                             <img src="./i/logo.svg" alt="logo" />
                         </div>
                         <div className="chart-wrapper">
-                            <div className="chart" id="chart"></div>
+                            <Chart />
                         </div>
 
                         <div className="statistic-wrapper">

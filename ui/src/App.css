@@ -85,11 +85,6 @@ aside {
     height: 158px;
     border-radius: 4px;
     background-color: #053241; }
-  aside .statistic-wrapper .statistic {
-    padding-top: 25px;
-    display: flex;
-    padding-left: 10px;
-    flex-direction: column; }
     aside .filters {
     margin: 10px 0;
     border-radius: 6px;
