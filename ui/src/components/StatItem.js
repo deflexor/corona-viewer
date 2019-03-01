@@ -24,7 +24,7 @@ class StatItem extends Component {
     const { text, count, prefix } = this.props;
     return (
       <div className={styles.statistic}>
-        <strong >{prefix}{count}M</strong>
+        <strong >{prefix}{count.toLocaleString('en')}</strong>
         <small>{text}</small>
       </div>
 

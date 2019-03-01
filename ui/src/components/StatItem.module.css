@@ -1,3 +1,10 @@
+.statistic {
+padding-top: 25px;
+display: flex;
+padding-left: 10px;
+flex-direction: column;
+}
+
 .statistic strong {
     flex: 1;
     font-size: 25px;
