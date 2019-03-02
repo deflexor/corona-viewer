@@ -2,9 +2,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Warning
 
-before running `npm start` create file  in `src/apikey.js` with following content:
+Before running `npm start` do following steps:
 
-`export const GOOGLE_API_KEY = 'your google maps api key here'`
+1. Create file  in `src/apikey.js` with following content:
+   `export const GOOGLE_API_KEY = 'your google maps api key here'`
+
+2. start backend app (corona-viewer) on port 3000 or configure websocket backend URL in `src/config.js`
 
 ## Available Scripts
 
@@ -13,7 +16,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 The page will reload if you make edits.<br>
 You will also see any lint errors in the console.
