@@ -75,6 +75,16 @@ io.on('connection', client => {
       logger.info('Send event to client.')
       client.send(events[index])
       index += 1
+    } else {
+      let r = parseInt(Math.random()*100);
+      if(r > 90) {
+
+      } else if(r > 80) {
+
+      } else if (false) {
+        logger.info('Send event to client2')
+        client.send({ test: 1 })  
+      }
     }
   }, Number(config.NEXT_CLIENT_EVENT_PERIOD))
 

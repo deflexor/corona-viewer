@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
+import geocoder from 'geocoder-geojson';
 
+import { connectWS } from "./wsAPI";
 import './App.css';
 import CheckBox1 from './components/CheckBox1';
 import StatItem from './components/StatItem';
 import Map from './components/Map';
 import Chart from './components/Chart';
 import { selectTrack, selectOperation } from './map';
+import { ALPHA3 } from './countryData';
+
+let geoCache = {};
 
 class App extends Component {
 
@@ -29,6 +34,42 @@ class App extends Component {
         };
         this.trackChanged = this.trackChanged.bind(this);
         this.operationChanged = this.operationChanged.bind(this);
+        connectWS(message => {
+            this.handleData(message);
+        });
+    }
+
+    handleData(data) {
+        let geodata;
+        if(data.location && ALPHA3[data.location]) {
+            const loc = ALPHA3[data.location];
+            if(geoCache[loc]) {
+                geodata = geoCache[loc];
+            } else {
+                geodata = await geocoder.wikidata(loc);
+                geoCache[loc] = geodata;
+            }
+        }
+        console.log(geodata)
+        switch (data.type) {
+            case 'USER_REGISTRATION':
+                break;
+            case 'ADD_RESOURCE':
+                break;
+            case 'UPDATE_DRAFT_CHALLENGE':
+                // ignore
+                break;
+            case 'ACTIVATE_CHALLENGE':
+                break;
+            case 'CLOSE_TASK':
+                break;
+            case 'CONTEST_SUBMISSION':
+                break;
+            case 'END':
+                break;
+            default:
+                console.log('Unknown data type from websocket:', data.type);
+        }
     }
 
     trackChanged(e) {

@@ -13,11 +13,11 @@ const redis = new Redis(config.REDIS_CONNECTION)
  * Get latest configured count of events from Redis. Latest one is stored at the end of array.
  * @returns {Array} the latest configured count of events from Redis
  */
-async function getLatestEvents () {
+async function getLatestEvents() {
   // get Redis list length
   const count = await redis.llen(config.REDIS_EVENT_LIST_KEY)
   if (count === 0) {
-    return []
+    // return []
   }
   const max = Number(config.MAX_CACHED_EVENTS)
   let start = count - max
@@ -26,7 +26,24 @@ async function getLatestEvents () {
   }
   const end = count - 1
   const events = await redis.lrange(config.REDIS_EVENT_LIST_KEY, start, end)
-  return events
+  let e1 = [
+    {
+      topic:
+        'challenge.notification.events',
+      challengeName: 'Code Dev-Env Test',
+      challengeType: 'Code',
+      challengePrizes: [350, 150
+      ],
+      firstName: 'F_NAME',
+      lastName: 'L_NAME',
+      photoURL: 'https://www.topcoder.com/i/m/callmekatootie.jpeg',
+      createdAt: new Date('2018-02-15T18:30:00.000Z'),
+      location: 'IND',
+      handle: 'callmekatootie',
+      type: 'USER_REGISTRATION'
+    }
+  ];
+  return e1
 }
 
 /**
@@ -38,7 +55,7 @@ async function getLatestEvents () {
  * @param {Array} globalEvents the global events
  * @returns {Array} the new events
  */
-function getNewEvents (clientEvents, globalEvents) {
+function getNewEvents(clientEvents, globalEvents) {
   const oldOnes = clientEvents || []
   const newOnes = globalEvents || []
   if (oldOnes.length === 0) {

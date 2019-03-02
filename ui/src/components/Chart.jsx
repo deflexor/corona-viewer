@@ -98,9 +98,12 @@ class Chart extends Component {
         return (
             <div className="chart">
                 {chartData.map(d =>
-                    <div 
+                    <div
+                        key={d.date} 
                         style={{height: d.zero ? '4px' : (d.value + '%')}}
-                        className={`${d.zero ? 'zero' : ''} ${d.today ? 'today' : ''}`}>&nbsp;</div>
+                        className={`${d.zero ? 'zero' : ''} ${d.today ? 'today' : ''}`}>
+                        &nbsp;
+                    </div>
                 )}
             </div>
         )
