@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "geocoder-geojson": "^1.11.0",
     "google-map-react": "^1.1.2",
     "lodash": "^4.17.11",
+    "node-open-geocoder": "^2.1.0",
     "react": "^16.8.3",
     "react-countup": "^4.1.1",
     "react-dom": "^16.8.3",

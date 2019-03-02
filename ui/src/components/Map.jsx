@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import GoogleMapReact from 'google-map-react';
 
 import { initMap } from '../map';
-import { apiKey } from '../apikey'
+import { GOOGLE_API_KEY } from '../apikey';
 // import styles from './Map.module.css';
 
 const propTypes = {
@@ -31,7 +31,7 @@ class Map extends Component {
         return (
             <div className="google-map">
                 <GoogleMapReact
-                    bootstrapURLKeys={{ key: apiKey }}
+                    bootstrapURLKeys={{ key: GOOGLE_API_KEY }}
                     defaultCenter={this.props.center}
                     defaultZoom={this.props.zoom}
                     yesIWantToUseGoogleMapApiInternals

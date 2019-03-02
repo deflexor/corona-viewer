@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import geocoder from 'geocoder-geojson';
 
 import { connectWS } from "./wsAPI";
 import './App.css';
@@ -7,10 +6,13 @@ import CheckBox1 from './components/CheckBox1';
 import StatItem from './components/StatItem';
 import Map from './components/Map';
 import Chart from './components/Chart';
-import { selectTrack, selectOperation } from './map';
+import { selectTrack, selectOperation, geocode, addMarker, showPopupForMarker } from './map';
 import { ALPHA3 } from './countryData';
+import { DEFAULT_EVENT_LOCATION, MAX_EVENTS_TO_DISPLAY } from './config';
+import { GOOGLE_API_KEY } from './apikey';
 
 let geoCache = {};
+
 
 class App extends Component {
 
@@ -39,18 +41,18 @@ class App extends Component {
         });
     }
 
-    handleData(data) {
+    async handleData(data) {
         let geodata;
-        if(data.location && ALPHA3[data.location]) {
-            const loc = ALPHA3[data.location];
-            if(geoCache[loc]) {
-                geodata = geoCache[loc];
-            } else {
-                geodata = await geocoder.wikidata(loc);
-                geoCache[loc] = geodata;
-            }
+        let loc = data.location ? ALPHA3[data.location] : null;
+        loc = loc || DEFAULT_EVENT_LOCATION;
+        if (geoCache[loc]) {
+            geodata = geoCache[loc];
+        } else {
+            geodata = await geocode(loc);
+            geoCache[loc] = geodata;
         }
-        console.log(geodata)
+        [data.lat, data.lng] = geodata;
+        addMarker(this.mapComp.map, data)
         switch (data.type) {
             case 'USER_REGISTRATION':
                 break;
@@ -77,7 +79,7 @@ class App extends Component {
         this.setState({
             tracks: { ...this.state.tracks, [e.name]: active }
         });
-        selectTrack(this.map.map, active, e.text)
+        selectTrack(this.mapComp.map, active, e.text)
         console.log(`change track: ${e.name} to ${active}`)
     }
 
@@ -144,7 +146,7 @@ class App extends Component {
                         </ul>
                     </div>
                 </aside>
-                <Map ref={e => this.map = e} />
+                <Map ref={e => this.mapComp = e} />
             </div>
         );
     }

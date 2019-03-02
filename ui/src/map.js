@@ -1,8 +1,10 @@
 /*global google*/
-import { mapData } from './mapData'
 import { definePopupClass } from './mapPopup'
 const _ = require('lodash');
+const openGeocoder = require('node-open-geocoder');
 
+
+let mapData = [];
 let popup = null;
 let popupClass = null;
 let selectedMarkerObj = null;
@@ -207,15 +209,6 @@ export function initMap(map) {
         ]
     });
 
-    // add markers
-    const filterd = mapData.filter(item => {
-        return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
-    });
-
-    for (let i = 0; i < filterd.length; i++) {
-        addMarkers(map, filterd[i], i);
-    }
-
     map.addListener('click', function () {
         if (popup !== null) {
             popup.setMap(null);
@@ -231,6 +224,25 @@ export function initMap(map) {
         }
     });
 
+}
+
+export function geocode(address) {
+    let p = new Promise((resolve, reject) => {
+        openGeocoder()
+            .geocode(address)
+            .end((err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (!res.length) {
+                        reject('no results')
+                    } else {
+                        resolve([+res[0].lat, +res[0].lon])
+                    }
+                }
+            })
+    })
+    return p;
 }
 
 function generateToolTip(data) {
@@ -281,7 +293,7 @@ export function selectTrack(map, active, track) {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
     for (let i = 0; i < filterd.length; i++) {
-        addMarkers(map, filterd[i], i);
+        addMarker(map, filterd[i], i);
     }
 }
 
@@ -299,68 +311,73 @@ export function selectOperation(map, active, operation) {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
     for (let i = 0; i < filterd.length; i++) {
-        addMarkers(map, filterd[i], i);
+        addMarker(map, filterd[i], i);
     }
 }
 
-function addMarkers(map, data, i) {
+export function addMarker(map, data) {
+    console.log({ lat: data.lat, lng: data.lng })
     var marker = new google.maps.Marker({
         position: { lat: data.lat, lng: data.lng },
         animation: google.maps.Animation.DROP,
         icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            fillColor: colorMap[data.type],
+            fillColor: colorMap['DEVELOPMENT'],
             fillOpacity: 1,
             scale: 3,
             strokeWeight: 0
         }
     });
-    mapData[i].marker = marker;
-    marker.addListener('click', (selectedMarker) => {
-        if (document.getElementById('tooltip-content')) {
-            document.getElementById('tooltip-content').remove();
-        }
-
-        if (popup !== null) {
-            popup.setMap(null);
-        }
-        if (selectedMarkerElement) {
-            selectedMarkerElement.setIcon({
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: selectedMarkerFillColor,
-                fillOpacity: 1,
-                scale: 3,
-                strokeWeight: 0
-            });
-            selectedMarkerElement = null;
-        }
-        if (_.isEqual(selectedMarkerObj, selectedMarker)) {
-            selectedMarkerObj = null;
-            return false;
-        }
-        marker.setIcon({
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: colorMap[data.type],
-            fillOpacity: 1,
-            scale: 3,
-            strokeOpacity: .5,
-            strokeWeight: 12,
-            strokeColor: colorMap[data.type]
-        });
-        selectedMarkerObj = selectedMarker;
-        selectedMarkerFillColor = colorMap[data.type];
-        selectedMarkerElement = marker;
-        let tooltip = document.createElement('div');
-        tooltip.id = 'tooltip-content';
-        tooltip.innerHTML = generateToolTip(data);
-        tooltip.classList.add('tooltip-bubble', data.type);
-        document.body.appendChild(tooltip);
-        popup = new popupClass(
-            selectedMarker.latLng,
-            document.getElementById('tooltip-content'),
-            data.type);
-        popup.setMap(map);
-    });
+    marker.addListener('click', selected => showPopupForMarker(map, marker, selected, data));
 
     marker.setMap(map)
+    mapData.push({ ...data, marker })
+    return marker;
+}
+
+export function showPopupForMarker(map, marker, selectedMarker, data) {
+    console.log(marker, selectedMarker)
+    if (document.getElementById('tooltip-content')) {
+        document.getElementById('tooltip-content').remove();
+    }
+
+    if (popup !== null) {
+        popup.setMap(null);
+    }
+    if (selectedMarkerElement) {
+        selectedMarkerElement.setIcon({
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: selectedMarkerFillColor,
+            fillOpacity: 1,
+            scale: 3,
+            strokeWeight: 0
+        });
+        selectedMarkerElement = null;
+    }
+    if (_.isEqual(selectedMarkerObj, selectedMarker)) {
+        selectedMarkerObj = null;
+        return false;
+    }
+    marker.setIcon({
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: colorMap[data.type],
+        fillOpacity: 1,
+        scale: 3,
+        strokeOpacity: .5,
+        strokeWeight: 12,
+        strokeColor: colorMap[data.type]
+    });
+    selectedMarkerObj = selectedMarker;
+    selectedMarkerFillColor = colorMap[data.type];
+    selectedMarkerElement = marker;
+    let tooltip = document.createElement('div');
+    tooltip.id = 'tooltip-content';
+    tooltip.innerHTML = generateToolTip(data);
+    tooltip.classList.add('tooltip-bubble', data.type);
+    document.body.appendChild(tooltip);
+    popup = new popupClass(
+        selectedMarker.latLng,
+        document.getElementById('tooltip-content'),
+        data.type);
+    popup.setMap(map);
 }
