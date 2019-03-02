@@ -257,7 +257,7 @@ export function generateToolTip(data) {
     if (data.photoURL) {
         user = _.template("<div class='user-details'><img src='<%= photoURL %>' alt='user' /><small><%= createdAt %> вЂў <%= city %></small></div>");
     } else {
-        user = _.template("<div class='user-details'><small><%= createdAt %> вЂў <%= city %></small></div>");
+        user = _.template("<div class='user-details'><small><%= createdAt %> • <%= city %></small></div>");
     }
     html += user(data);
     return html
