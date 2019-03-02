@@ -6,10 +6,9 @@ import CheckBox1 from './components/CheckBox1';
 import StatItem from './components/StatItem';
 import Map from './components/Map';
 import Chart from './components/Chart';
-import { selectTrack, selectOperation, geocode, addMarker, showPopupForMarker } from './map';
+import { geocode, addMarker, showPopupForMarker, generateToolTip } from './map';
 import { ALPHA3 } from './countryData';
-import { DEFAULT_EVENT_LOCATION, MAX_EVENTS_TO_DISPLAY } from './config';
-import { GOOGLE_API_KEY } from './apikey';
+import { DEFAULT_EVENT_LOCATION } from './config';
 
 let geoCache = {};
 
@@ -44,7 +43,7 @@ class App extends Component {
     async handleData(data) {
         let geodata;
         let loc = data.location ? ALPHA3[data.location] : null;
-        loc = loc || DEFAULT_EVENT_LOCATION;
+        data.city = loc = loc || DEFAULT_EVENT_LOCATION;
         if (geoCache[loc]) {
             geodata = geoCache[loc];
         } else {
@@ -52,25 +51,13 @@ class App extends Component {
             geoCache[loc] = geodata;
         }
         [data.lat, data.lng] = geodata;
-        addMarker(this.mapComp.map, data)
-        switch (data.type) {
-            case 'USER_REGISTRATION':
-                break;
-            case 'ADD_RESOURCE':
-                break;
-            case 'UPDATE_DRAFT_CHALLENGE':
-                // ignore
-                break;
-            case 'ACTIVATE_CHALLENGE':
-                break;
-            case 'CLOSE_TASK':
-                break;
-            case 'CONTEST_SUBMISSION':
-                break;
-            case 'END':
-                break;
-            default:
-                console.log('Unknown data type from websocket:', data.type);
+        if (data.firstName || data.lastName) data.user = [data.firstName, data.lastName].filter(n => n).join(' ')
+        if (data.challengePrizes) data.prizesStr = data.challengePrizes.join(', ');
+        data.type1 = 'DEVELOPMENT';
+        data.tooltipHTML = generateToolTip(data);
+        if(data.tooltipHTML) {
+            const marker = addMarker(this.mapComp.map, data);
+            showPopupForMarker(this.mapComp.map, marker, data);
         }
     }
 
@@ -79,7 +66,7 @@ class App extends Component {
         this.setState({
             tracks: { ...this.state.tracks, [e.name]: active }
         });
-        selectTrack(this.mapComp.map, active, e.text)
+        // selectTrack(this.mapComp.map, active, e.text)
         console.log(`change track: ${e.name} to ${active}`)
     }
 
@@ -88,7 +75,7 @@ class App extends Component {
         this.setState({
             operations: { ...this.state.operations, [e.name]: active }
         });
-        selectOperation(this.map.map, active, e.text)
+        // selectOperation(this.map.map, active, e.text)
         console.log(`change operation: ${e.name} to ${active}`)
     }
 

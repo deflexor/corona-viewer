@@ -1,15 +1,13 @@
 /*global google*/
 import { definePopupClass } from './mapPopup'
+import { MAX_EVENTS_TO_DISPLAY } from './config';
 const _ = require('lodash');
 const openGeocoder = require('node-open-geocoder');
 
-
-let mapData = [];
-let popup = null;
+let mapMarkers = {};
 let popupClass = null;
-let selectedMarkerObj = null;
+let selectedMarkerKey = null;
 let selectedMarkerElement = null;
-let selectedMarkerFillColor = null;
 
 const colorMap = {
     "DESIGN": "#44dcff",
@@ -20,8 +18,6 @@ const colorMap = {
 
 const selectedTracks = ["DESIGN", "DEVELOPMENT", "DATA-SCIENCE", "ALGORITHM"];
 const selectedOperations = ["SUBMISSIONS", "REVIEW", "REGISTRATION", "FORUM", "SRM"];
-
-
 
 export function initMap(map) {
     // init custom popup
@@ -210,18 +206,10 @@ export function initMap(map) {
     });
 
     map.addListener('click', function () {
-        if (popup !== null) {
-            popup.setMap(null);
-            if (selectedMarkerElement) {
-                selectedMarkerElement.setIcon({
-                    path: google.maps.SymbolPath.CIRCLE,
-                    fillColor: selectedMarkerFillColor,
-                    fillOpacity: 1,
-                    scale: 3,
-                    strokeWeight: 0
-                });
-            }
+        if (selectedMarkerElement) {
+            // markerSetIcon(selectedMarkerElement)
         }
+        // popups.setMap(null);
     });
 
 }
@@ -245,38 +233,52 @@ export function geocode(address) {
     return p;
 }
 
-function generateToolTip(data) {
+export function generateToolTip(data) {
     let compiled = null;
-    if (data.operation === 'REGISTRATION') {
-        compiled = _.template("<strong>@<%= user %></strong> register on <strong>\"<%= challenge %>\"</strong>");
-    } else if (data.operation === 'SUBMISSIONS') {
-        compiled = _.template("<strong>@<%= user %></strong> submitted on <strong>\"<%= challenge %>\"</strong>.");
-    } else if (data.operation === 'REVIEW') {
-        compiled = _.template("<strong>@<%= user %></strong> review submissions on <strong>\"<%= challenge %>\"</strong>.");
-    } else if (data.operation === 'FORUM') {
-        compiled = _.template("<strong>@<%= user %></strong> replied on <strong>\"<%= challenge %>\"</strong> forum");
-    } else if (data.operation === 'VIEW') {
-        compiled = _.template("<strong>@<%= user %></strong> view on <strong>\"<%= challenge %>\"</strong>");
-    } else if (data.operation === 'SRM') {
-        compiled = _.template("<strong>@<%= user %></strong> submitted on <strong>\"<%= challenge %>\"</strong>");
+    // 'UPDATE_DRAFT_CHALLENGE' - ignore
+    // 'CLOSE_TASK' - ignore
+    if (data.type === 'USER_REGISTRATION') {
+        compiled = _.template(`<strong>@<%= handle %></strong> registered for the contestt <srong>"<%= challengeName %>"</strong> in the <srong>"<%= challengeType %>"</strong> track`);
+    } else if (data.type === 'ADD_RESOURCE') {
+        compiled = _.template(`<strong>@<%= handle %></strong> was added to contest <strong>"<%= challengeName %>"</strong> in the <srong>"<%= challengeType %>"</strong> track.`);
+    } else if (data.type === 'ACTIVATE_CHALLENGE') {
+        compiled = _.template(`Contest <strong>"<%= challengeName %>"</strong> has just been launched in the <strong>"<%= challengeType %>"</strong> track. The prize(s) are <strong>"<%= prizesStr %>"</strong>.`);
+    } else if (data.type === 'CONTEST_SUBMISSION') {
+        compiled = _.template(`<strong>@<%= handle %></strong> has uploaded a submission for the contest <strong>"<%= challengeName %>"</strong> in the <strong>"<%= challengeType %>"</strong> track`);
+    } else if (data.type === 'END') {
+        compiled = _.template(`<strong>"<%= phaseTypeName %>"</strong> phase for contest <strong>"<%= challengeName %>"</strong> in <strong>"<%= challengeType %>"</strong> track has <strong>"<%= state %>"</strong>`);
     }
+
+    if (!compiled) return;
+
     let html = compiled(data);
     html = "<div>" + html + "</div>";
-    const user = _.template("<div class='user-details'><img src='i/<%= avatar %>' alt='user' /><small><%= date %> вЂў <%= city %></small></div>");
+    let user
+    if (data.photoURL) {
+        user = _.template("<div class='user-details'><img src='<%= photoURL %>' alt='user' /><small><%= createdAt %> вЂў <%= city %></small></div>");
+    } else {
+        user = _.template("<div class='user-details'><small><%= createdAt %> вЂў <%= city %></small></div>");
+    }
     html += user(data);
     return html
 }
 
 function removeAllMarkers() {
-    if (popup !== null) {
-        popup.setMap(null);
+    for (const k in mapMarkers) {
+        removeMarker(k);
     }
-    for (const data of mapData) {
-        if (data.marker) {
-            data.marker.setMap(null);
-            data.marker = null;
-        }
+}
+
+function removeMarker(k) {
+    if (mapMarkers[k].popup !== null) {
+        mapMarkers[k].popup.setMap(null);
+        mapMarkers[k].popup = null;
     }
+    if (mapMarkers[k].marker) {
+        mapMarkers.marker.setMap(null);
+        mapMarkers.marker = null;
+    }
+    delete mapMarkers[k]
 }
 
 export function selectTrack(map, active, track) {
@@ -289,7 +291,7 @@ export function selectTrack(map, active, track) {
             selectedTracks.splice(index, 1);
         }
     }
-    const filterd = mapData.filter(item => {
+    const filterd = mapMarkers.filter(item => {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
     for (let i = 0; i < filterd.length; i++) {
@@ -307,7 +309,7 @@ export function selectOperation(map, active, operation) {
             selectedOperations.splice(index, 1);
         }
     }
-    const filterd = mapData.filter(item => {
+    const filterd = mapMarkers.filter(item => {
         return selectedOperations.indexOf(item.operation) !== -1 && selectedTracks.indexOf(item.type) !== -1;
     });
     for (let i = 0; i < filterd.length; i++) {
@@ -316,68 +318,98 @@ export function selectOperation(map, active, operation) {
 }
 
 export function addMarker(map, data) {
-    console.log({ lat: data.lat, lng: data.lng })
     var marker = new google.maps.Marker({
         position: { lat: data.lat, lng: data.lng },
         animation: google.maps.Animation.DROP,
         icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            fillColor: colorMap['DEVELOPMENT'],
+            fillColor: colorMap[data.type1],
             fillOpacity: 1,
             scale: 3,
             strokeWeight: 0
         }
     });
-    marker.addListener('click', selected => showPopupForMarker(map, marker, selected, data));
+    marker.addListener('click', () => showPopupForMarker(map, marker, data, true));
 
     marker.setMap(map)
-    mapData.push({ ...data, marker })
+    const nmarkers = Object.keys(mapMarkers).length;
+    mapMarkers[getCoordsStr(data)] = { ...data, marker, popup: null, i: nmarkers + 1 }
+    // remove old event markers
+    if (nmarkers + 1 > MAX_EVENTS_TO_DISPLAY) {
+        let min = nmarkers + 1
+        let mink
+        for (const k in mapMarkers) {
+            if (mapMarkers[k].i < min) {
+                min = mapMarkers[k].i
+                mink = k
+            }
+        }
+        removeMarker(mink)
+    }
     return marker;
 }
 
-export function showPopupForMarker(map, marker, selectedMarker, data) {
-    console.log(marker, selectedMarker)
-    if (document.getElementById('tooltip-content')) {
-        document.getElementById('tooltip-content').remove();
-    }
+function getCoordsStr({ lat, lng }) {
+    return `${lat}-${lng}`;
+}
 
-    if (popup !== null) {
-        popup.setMap(null);
-    }
-    if (selectedMarkerElement) {
-        selectedMarkerElement.setIcon({
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: selectedMarkerFillColor,
-            fillOpacity: 1,
-            scale: 3,
-            strokeWeight: 0
-        });
-        selectedMarkerElement = null;
-    }
-    if (_.isEqual(selectedMarkerObj, selectedMarker)) {
-        selectedMarkerObj = null;
-        return false;
-    }
+function markerSetIcon(marker) {
     marker.setIcon({
         path: google.maps.SymbolPath.CIRCLE,
-        fillColor: colorMap[data.type],
+        fillColor: colorMap['DEVELOPMENT'],
+        fillOpacity: 1,
+        scale: 3,
+        strokeWeight: 0
+    });
+}
+
+function markerSetIconSel(marker) {
+    marker.setIcon({
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: colorMap['DEVELOPMENT'],
         fillOpacity: 1,
         scale: 3,
         strokeOpacity: .5,
         strokeWeight: 12,
-        strokeColor: colorMap[data.type]
+        strokeColor: colorMap['DEVELOPMENT']
     });
-    selectedMarkerObj = selectedMarker;
-    selectedMarkerFillColor = colorMap[data.type];
+}
+
+export function showPopupForMarker(map, marker, data, manual) {
+    const selectedMarkerCoords = { lat: () => data.lat, lng: () => data.lng };
+    const coordsStr = getCoordsStr(data);
+
+    if (mapMarkers[coordsStr].popup !== null) {
+        mapMarkers[coordsStr].popup.setMap(null);
+        mapMarkers[coordsStr].popup = null;
+        markerSetIcon(mapMarkers[coordsStr].marker);
+    }
+    if (selectedMarkerElement) {
+        selectedMarkerElement = null;
+    }
+    if (selectedMarkerKey === coordsStr) {
+        selectedMarkerKey = null;
+        return false;
+    }
+    markerSetIconSel(marker);
+    selectedMarkerKey = coordsStr;
     selectedMarkerElement = marker;
     let tooltip = document.createElement('div');
-    tooltip.id = 'tooltip-content';
-    tooltip.innerHTML = generateToolTip(data);
-    tooltip.classList.add('tooltip-bubble', data.type);
+    tooltip.innerHTML = data.tooltipHTML;
+    tooltip.classList.add('tooltip-bubble', data.type1);
     document.body.appendChild(tooltip);
-    popup = new popupClass(
-        selectedMarker.latLng,
-        document.getElementById('tooltip-content'),
-        data.type);
+    const popup = new popupClass(
+        selectedMarkerCoords,
+        tooltip,
+        data.type1);
     popup.setMap(map);
+    mapMarkers[coordsStr].popup = popup;
+    if (!manual) {
+        setTimeout(() => {
+            popup.setMap(null);
+            mapMarkers[coordsStr].popup = null;
+            markerSetIcon(marker);
+        }, 2000);
+    }
+
 }
